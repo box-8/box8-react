@@ -42,11 +42,22 @@ const TaskModal = ({ show, onHide, onAdd, onUpdate, onDelete, selectedEdge, node
     
     const taskData = {
       ...formData,
-      id: selectedEdge ? selectedEdge.id : `${formData.from}-${formData.to}`
+      id: selectedEdge ? 
+        // Si les agents ont changé, créer un nouvel ID
+        (formData.from === selectedEdge.source && formData.to === selectedEdge.target) ?
+          selectedEdge.id : 
+          `${formData.from}-${formData.to}` :
+        `${formData.from}-${formData.to}`
     };
 
-    if (selectedEdge) { 
-      onUpdate(taskData);
+    if (selectedEdge) {
+      // Si les agents ont changé, supprimer l'ancienne connexion et créer une nouvelle
+      if (formData.from !== selectedEdge.source || formData.to !== selectedEdge.target) {
+        onDelete(selectedEdge.id);
+        onAdd(taskData);
+      } else {
+        onUpdate(taskData);
+      }
     } else {
       onAdd(taskData);
     }
@@ -89,7 +100,6 @@ const TaskModal = ({ show, onHide, onAdd, onUpdate, onDelete, selectedEdge, node
                 value={formData.from}
                 onChange={(e) => setFormData({ ...formData, from: e.target.value })}
                 required
-                disabled={selectedEdge}
               >
                 <option value="">Select agent...</option>
                 {nodes
@@ -106,7 +116,6 @@ const TaskModal = ({ show, onHide, onAdd, onUpdate, onDelete, selectedEdge, node
                 variant="outline-secondary"
                 onClick={handleSwap}
                 title="Swap agents"
-                disabled={selectedEdge}
               >
                 ↔
               </Button>
@@ -117,7 +126,6 @@ const TaskModal = ({ show, onHide, onAdd, onUpdate, onDelete, selectedEdge, node
                 value={formData.to}
                 onChange={(e) => setFormData({ ...formData, to: e.target.value })}
                 required
-                disabled={selectedEdge}
               >
                 <option value="">Select agent...</option>
                 {nodes.map((node) => (
@@ -153,7 +161,7 @@ const TaskModal = ({ show, onHide, onAdd, onUpdate, onDelete, selectedEdge, node
               value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value })}
             >
-              <option value="">Select type...</option>
+              <option value="">Select relationship type...</option>
               {RELATIONSHIP_TYPES.map((type) => (
                 <option key={type.value} value={type.value}>
                   {type.text}
@@ -161,18 +169,21 @@ const TaskModal = ({ show, onHide, onAdd, onUpdate, onDelete, selectedEdge, node
               ))}
             </Form.Select>
           </Form.Group>
-          <div className="d-flex gap-2">
-            <Button type="submit" variant="primary">
-              {selectedEdge ? 'Update' : 'Add'} Task
-            </Button>
-            {selectedEdge && (
-              <Button variant="danger" onClick={handleDelete}>
-                Delete
-              </Button>
-            )}
-          </div>
         </Form>
       </Modal.Body>
+      <Modal.Footer>
+        {selectedEdge && (
+          <Button variant="danger" onClick={handleDelete}>
+            Delete
+          </Button>
+        )}
+        <Button variant="secondary" onClick={onHide}>
+          Cancel
+        </Button>
+        <Button variant="primary" onClick={handleSubmit}>
+          {selectedEdge ? 'Update' : 'Add'} Task
+        </Button>
+      </Modal.Footer>
     </Modal>
   );
 };

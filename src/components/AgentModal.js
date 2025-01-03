@@ -9,12 +9,36 @@ const AgentModal = ({ show, onHide, onAdd, onUpdate, onDelete, selectedNode }) =
     backstory: '',
     file: ''
   });
+  const [sharePointFiles, setSharePointFiles] = useState({ files: [] });
+
+  useEffect(() => {
+    if (show) {
+      // Charger la liste des fichiers SharePoint
+      fetch('http://localhost:8000/chatapp/get_sharepoint_files/', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log('SharePoint files:', data);
+          setSharePointFiles(data || { files: [] });
+        })
+        .catch(error => console.error('Error loading SharePoint files:', error));
+    }
+  }, [show]);
 
   useEffect(() => {
     if (selectedNode) {
+      // Si un fichier est déjà associé, on le conserve
+      const currentFile = selectedNode.data.file || '';
       setFormData({
         key: selectedNode.id,
-        ...selectedNode.data
+        ...selectedNode.data,
+        file: currentFile
       });
     } else {
       setFormData({
@@ -90,11 +114,21 @@ const AgentModal = ({ show, onHide, onAdd, onUpdate, onDelete, selectedNode }) =
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Associated File</Form.Label>
-            <Form.Control
-              type="text"
-              value={formData.file}
+            <Form.Select
+              value={formData.file || ''}
               onChange={(e) => setFormData({ ...formData, file: e.target.value })}
-            />
+            >
+              <option value="">Select a file...</option>
+              {sharePointFiles.files.map((file, index) => (
+                <option 
+                  key={index} 
+                  value={file.path}
+                  selected={formData.file === file.path}
+                >
+                  {`${file.analyse} / ${file.name}`}
+                </option>
+              ))}
+            </Form.Select>
           </Form.Group>
           <div className="d-flex gap-2">
             <Button type="submit" variant="primary">

@@ -45,7 +45,7 @@ const FloatingButtons = ({ onAddAgent, onAddTask, onCreateCrewAI, onSaveDiagram,
         variant="warning"
         className="floating-button"
         onClick={onCreateCrewAI}
-        title="Create CrewAI Process"
+        title="Launch CrewAI Process"
       >
         <i className="bi bi-play-fill"></i>
       </Button>

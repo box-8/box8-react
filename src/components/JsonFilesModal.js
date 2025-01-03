@@ -53,11 +53,11 @@ const JsonFilesModal = ({ show, handleClose, onFileSelect }) => {
       <Modal.Header closeButton>
         <Modal.Title>Load Diagram</Modal.Title>
       </Modal.Header>
-      <Modal.Body>
-        <div className="row">
-          <div className="col-md-6">
+      <Modal.Body style={{ maxHeight: '70vh', overflow: 'hidden' }}>
+        <div className="row" style={{ height: '60vh' }}>
+          <div className="col-md-6" style={{ height: '100%', overflowY: 'auto' }}>
             <h5>Available Diagrams</h5>
-            <ListGroup>
+            <ListGroup style={{ height: 'calc(100% - 40px)', overflowY: 'auto' }}>
               {files.map((file, index) => (
                 <ListGroup.Item
                   key={index}
@@ -70,13 +70,25 @@ const JsonFilesModal = ({ show, handleClose, onFileSelect }) => {
               ))}
             </ListGroup>
           </div>
-          <div className="col-md-6">
+          <div className="col-md-6" style={{ height: '100%', overflowY: 'auto' }}>
             <h5>Preview</h5>
-            {fileContent && (
-              <pre style={{ maxHeight: '300px', overflow: 'auto' }}>
-                {JSON.stringify(fileContent, null, 2)}
-              </pre>
-            )}
+            <div style={{ 
+              height: 'calc(100% - 40px)',
+              overflowY: 'auto',
+              backgroundColor: '#f8f9fa',
+              padding: '10px',
+              borderRadius: '4px'
+            }}>
+              {fileContent && (
+                <pre style={{ 
+                  margin: 0,
+                  whiteSpace: 'pre-wrap',
+                  wordWrap: 'break-word'
+                }}>
+                  {JSON.stringify(fileContent, null, 2)}
+                </pre>
+              )}
+            </div>
           </div>
         </div>
       </Modal.Body>

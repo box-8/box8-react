@@ -227,8 +227,8 @@ function App() {
     };
     console.log(diagramData);
     var csrf = Cookies.get('csrftoken');
-    console.log(csrf);
-    
+
+    return false
     // Envoyer la requête au serveur
     fetch('http://127.0.0.1:8000/chatapp/designer/launch_crewai/', {
       method: 'POST',
