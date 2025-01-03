@@ -1,68 +1,115 @@
-# Box8 React
+# Box8 React - Interface de Conception de Workflows CrewAI
 
-A modern React application built with React Flow for creating interactive node-based interfaces.
+Box8 React est une interface utilisateur moderne pour la conception et la gestion de workflows CrewAI. Cette application permet de créer, modifier et exécuter visuellement des workflows d'agents AI collaboratifs.
 
-## Features
+## Fonctionnalités
 
-- Interactive node-based interface using React Flow
-- Modern UI with Bootstrap 5
-- Custom node and edge components
-- Task management modal system
+- **Éditeur de Diagramme Visuel**
+  - Création et modification de workflows par glisser-déposer
+  - Positionnement automatique des éléments
+  - Connexions interactives entre les agents
 
-## Technologies Used
+- **Gestion des Agents**
+  - Création d'agents avec rôles spécifiques
+  - Définition des objectifs et backstories
+  - Association de fichiers aux agents
 
-- React 18
-- React Flow
-- Bootstrap 5
-- React Bootstrap
-- Marked (for markdown processing)
+- **Gestion des Tâches**
+  - Définition des relations entre agents
+  - Spécification des sorties attendues
+  - Description détaillée des tâches
 
-## Prerequisites
+- **Gestion des Diagrammes**
+  - Sauvegarde des diagrammes
+  - Chargement de diagrammes existants
+  - Prévisualisation du contenu
 
-- Node.js (v14 or higher)
-- npm or yarn
+- **Intégration CrewAI**
+  - Exécution directe des workflows
+  - Visualisation des résultats
+  - Gestion des processus CrewAI
 
 ## Installation
 
-1. Clone the repository:
+1. Cloner le dépôt :
 ```bash
-git clone https://github.com/yourusername/box8-react.git
+git clone [url-du-repo]
 cd box8-react
 ```
 
-2. Install dependencies:
+2. Installer les dépendances :
 ```bash
 npm install
 ```
 
-## Available Scripts
+3. Démarrer l'application en mode développement :
+```bash
+npm start
+```
 
-In the project directory, you can run:
+L'application sera accessible à l'adresse [http://localhost:3000](http://localhost:3000).
 
-- `npm start`: Runs the app in development mode
-- `npm test`: Launches the test runner
-- `npm run build`: Builds the app for production
-- `npm run eject`: Ejects from Create React App
+## Configuration
 
-## Development
+L'application nécessite un backend Django (box8_django) fonctionnel. Assurez-vous que :
+- Le serveur Django est en cours d'exécution sur le port 8000
+- Les paramètres CORS sont correctement configurés
+- Les endpoints API sont accessibles
 
-The application is built using Create React App and follows its conventional structure:
+## Structure du Projet
 
-- `/src/components`: Contains React components
-- `/src/index.js`: Application entry point
+```
+box8-react/
+├── src/
+│   ├── components/         # Composants React
+│   │   ├── AgentModal.js  # Modal de création/édition d'agent
+│   │   ├── AgentNode.js   # Nœud d'agent dans le diagramme
+│   │   ├── TaskModal.js   # Modal de création/édition de tâche
+│   │   └── ...
+│   ├── App.js             # Composant principal
+│   └── index.js           # Point d'entrée
+├── public/                # Fichiers statiques
+└── package.json          # Dépendances et scripts
+```
 
-## Contributing
+## Utilisation
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. **Créer un nouveau workflow**
+   - Utiliser le bouton "Add Agent" pour ajouter des agents
+   - Utiliser le bouton "Add Task" pour créer des connexions
+   - Configurer les propriétés via les modals
 
-## License
+2. **Sauvegarder un workflow**
+   - Cliquer sur le bouton "Save Diagram"
+   - Remplir le nom et la description
+   - Confirmer la sauvegarde
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+3. **Charger un workflow existant**
+   - Cliquer sur le bouton "Load Diagram"
+   - Sélectionner un diagramme dans la liste
+   - Visualiser et charger le diagramme
 
-## Created
+4. **Exécuter un workflow**
+   - Configurer tous les agents et connexions
+   - Cliquer sur le bouton "Create CrewAI Process"
+   - Visualiser les résultats dans le modal de réponse
 
-This project was created on January 3, 2025.
+## Technologies Utilisées
+
+- React
+- React Flow
+- Bootstrap
+- Fetch API
+
+## Contribution
+
+Les contributions sont les bienvenues ! N'hésitez pas à :
+1. Fork le projet
+2. Créer une branche pour votre fonctionnalité
+3. Commiter vos changements
+4. Pousser vers la branche
+5. Ouvrir une Pull Request
+
+## Licence
+
+Ce projet est sous licence [insérer type de licence].
