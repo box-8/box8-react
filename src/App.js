@@ -14,6 +14,10 @@ import CustomEdge from './components/CustomEdge';
 import AgentModal from './components/AgentModal';
 import TaskModal from './components/TaskModal';
 import FloatingButtons from './components/FloatingButtons';
+import DiagramModal from './components/DiagramModal';
+import ResponseModal from './components/ResponseModal';
+import JsonFilesModal from './components/JsonFilesModal';
+import Cookies from 'js-cookie';
 
 const nodeTypes = {
   agent: AgentNode,
@@ -44,8 +48,13 @@ function App() {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [showAgentModal, setShowAgentModal] = useState(false);
   const [showTaskModal, setShowTaskModal] = useState(false);
+  const [showDiagramModal, setShowDiagramModal] = useState(false);
+  const [showResponseModal, setShowResponseModal] = useState(false);
+  const [showJsonFilesModal, setShowJsonFilesModal] = useState(false);
+  const [responseMessage, setResponseMessage] = useState('');
   const [selectedNode, setSelectedNode] = useState(null);
   const [selectedEdge, setSelectedEdge] = useState(null);
+  const [diagramData, setDiagramData] = useState({ name: '', description: '' });
 
   const onConnect = useCallback((params) => {
     const edge = {
@@ -139,6 +148,70 @@ function App() {
     setEdges((eds) => eds.filter((edge) => edge.id !== taskId));
   };
 
+  const handleLoadDiagram = (diagramData) => {
+    console.log('Diagram Data:', diagramData);
+    if (diagramData.nodes && diagramData.links) {
+      console.log('Nodes:', diagramData.nodes);
+      console.log('Links:', diagramData.links);
+      
+      // Calculer les positions initiales des nœuds
+      const nodeSpacing = 200;
+      const startX = 100;
+      const startY = 100;
+      let currentX = startX;
+      let currentY = startY;
+      let maxNodesPerRow = 3;
+      
+      const newNodes = diagramData.nodes.map((node, index) => {
+        console.log('Processing node:', node);
+        // Calculer la position du nœud
+        const row = Math.floor(index / maxNodesPerRow);
+        const col = index % maxNodesPerRow;
+        const position = {
+          x: startX + col * nodeSpacing,
+          y: startY + row * nodeSpacing
+        };
+
+        return {
+          id: node.key,
+          type: node.category === 'output' ? 'output' : 'agent',
+          position: position,
+          data: {
+            label: node.role,
+            role: node.role,
+            goal: node.goal,
+            backstory: node.backstory,
+            file: node.file
+          }
+        };
+      });
+      
+      const newEdges = diagramData.links.map(edge => {
+        console.log('Processing edge:', edge);
+        return {
+          id: `${edge.from}-${edge.to}`,
+          source: edge.from,
+          target: edge.to,
+          type: 'custom',
+          data: {
+            label: edge.description,
+            description: edge.description,
+            expected_output: edge.expected_output,
+            relationship: edge.relationship
+          }
+        };
+      });
+
+      console.log('New Nodes:', newNodes);
+      console.log('New Edges:', newEdges);
+      
+      setNodes(newNodes);
+      setEdges(newEdges);
+    } else {
+      console.error('Invalid diagram data structure:', diagramData);
+    }
+  };
+
   const handleCreateCrewAI = useCallback(() => {
     // Récupérer les données du diagramme
     const diagramData = {
@@ -153,13 +226,16 @@ function App() {
       }))
     };
     console.log(diagramData);
+    var csrf = Cookies.get('csrftoken');
+    console.log(csrf);
+    
     // Envoyer la requête au serveur
     fetch('http://127.0.0.1:8000/chatapp/designer/launch_crewai/', {
       method: 'POST',
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRFToken': document.cookie.split('; ').find(row => row.startsWith('csrftoken'))?.split('=')[1],
+        'X-CSRFToken': csrf,
       },
       body: JSON.stringify(diagramData)
     })
@@ -170,9 +246,10 @@ function App() {
       return response.json();
     })
     .then(data => {
-      // Gérer la réponse
-      if (data.success) {
-        alert('CrewAI Process created successfully!');
+      console.log(data);
+      if (data.status === 'success') {
+        setResponseMessage(data.message);
+        setShowResponseModal(true);
       } else {
         alert('Error creating CrewAI Process: ' + data.error);
       }
@@ -201,9 +278,11 @@ function App() {
         <Controls />
       </ReactFlow>
 
-      <FloatingButtons
+      <FloatingButtons 
         onAddAgent={() => setShowAgentModal(true)}
         onAddTask={() => setShowTaskModal(true)}
+        onSaveDiagram={() => setShowDiagramModal(true)}
+        onLoadDiagram={() => setShowJsonFilesModal(true)}
         onCreateCrewAI={handleCreateCrewAI}
       />
 
@@ -230,6 +309,29 @@ function App() {
         onDelete={handleDeleteTask}
         selectedEdge={selectedEdge}
         nodes={nodes}
+      />
+
+      <DiagramModal
+        show={showDiagramModal}
+        handleClose={() => setShowDiagramModal(false)}
+        onSave={(data) => {
+          setDiagramData(data);
+          // Ici, vous pouvez ajouter la logique pour sauvegarder le diagramme
+          console.log('Saving diagram:', { ...data, nodes, edges });
+        }}
+        initialData={diagramData}
+      />
+
+      <ResponseModal
+        show={showResponseModal}
+        handleClose={() => setShowResponseModal(false)}
+        message={responseMessage}
+      />
+
+      <JsonFilesModal
+        show={showJsonFilesModal}
+        handleClose={() => setShowJsonFilesModal(false)}
+        onFileSelect={handleLoadDiagram}
       />
     </div>
   );

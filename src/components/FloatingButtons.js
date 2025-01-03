@@ -1,7 +1,8 @@
 import React from 'react';
 import { Button } from 'react-bootstrap';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
-const FloatingButtons = ({ onAddAgent, onAddTask, onCreateCrewAI }) => {
+const FloatingButtons = ({ onAddAgent, onAddTask, onCreateCrewAI, onSaveDiagram, onLoadDiagram }) => {
   return (
     <div className="floating-buttons">
       <Button
@@ -12,6 +13,7 @@ const FloatingButtons = ({ onAddAgent, onAddTask, onCreateCrewAI }) => {
       >
         <i className="bi bi-person-plus"></i>
       </Button>
+
       <Button
         variant="success"
         className="floating-button"
@@ -20,6 +22,25 @@ const FloatingButtons = ({ onAddAgent, onAddTask, onCreateCrewAI }) => {
       >
         <i className="bi bi-link"></i>
       </Button>
+
+      <Button
+        variant="info"
+        className="floating-button"
+        onClick={onSaveDiagram}
+        title="Save Diagram"
+      >
+        <i className="bi bi-save"></i>
+      </Button>
+
+      <Button
+        variant="secondary"
+        className="floating-button"
+        onClick={onLoadDiagram}
+        title="Load Diagram"
+      >
+        <i className="bi bi-folder2-open"></i>
+      </Button>
+
       <Button
         variant="warning"
         className="floating-button"
