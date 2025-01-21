@@ -531,46 +531,60 @@ function Flow() {
       })),
       chatInput: chatInput
     };
-    
-    var csrf = Cookies.get('csrftoken');
 
-    // Envoyer la requête au serveur
-    fetch(`${config.API_BASE_URL}/designer/launch-crewai/`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrf,
-      },
-      body: JSON.stringify(diagramData)
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log(data);
+    // Créer une nouvelle connexion WebSocket pour l'exécution du processus
+    const processSocket = new WebSocket(`${config.WS_BASE_URL}/ws/execute-process`);
+
+    processSocket.onopen = () => {
+      console.log('Process WebSocket Connected');
+      processSocket.send(JSON.stringify({
+        diagram_data: diagramData,
+        folder: "",
+        llm: currentLLM
+      }));
+    };
+
+    processSocket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log('Process WebSocket message:', data);
+
       if (data.status === 'success') {
-        setResponseMessage(data.message);
-        setBackstories(data.backstories.map(b => ({
-          name: b.role,
-          backstory: b.backstory
-        })));
+        setResponseMessage(data.result.message);
+        if (data.result.backstories) {
+          setBackstories(data.result.backstories.map(b => ({
+            name: b.role,
+            backstory: b.backstory
+          })));
+        }
         setShowResponseModal(true);
-      } else {
-        alert('Error creating CrewAI Process: ' + data.message);
+        setIsCreatingCrewAI(false);  // Fermer le LoadingModal en cas de succès
+        processSocket.close();  // Fermer la connexion WebSocket
+      } else if (data.status === 'error') {
+        alert('Error in CrewAI Process: ' + data.message);
+        setIsCreatingCrewAI(false);  // Fermer le LoadingModal en cas d'erreur
+        processSocket.close();  // Fermer la connexion WebSocket
       }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error creating CrewAI Process: ' + error.message);
-    })
-    .finally(() => {
-      setIsCreatingCrewAI(false);
-    });
-  }, [nodes, edges]);
+    };
+
+    processSocket.onerror = (error) => {
+      console.error('Process WebSocket Error:', error);
+      alert('Error in CrewAI Process connection');
+      setIsCreatingCrewAI(false);  // Fermer le LoadingModal en cas d'erreur
+      processSocket.close();  // Fermer la connexion WebSocket
+    };
+
+    processSocket.onclose = () => {
+      console.log('Process WebSocket Closed');
+      setIsCreatingCrewAI(false);  // S'assurer que le LoadingModal est fermé
+    };
+
+    // Nettoyer la connexion WebSocket lors du démontage
+    return () => {
+      if (processSocket && processSocket.readyState === WebSocket.OPEN) {
+        processSocket.close();
+      }
+    };
+  }, [nodes, edges, currentLLM]);
 
   const handleEnhanceDiagram = useCallback((chatInput) => {
     setIsCreatingCrewAI(true);
